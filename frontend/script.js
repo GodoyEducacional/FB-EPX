@@ -33,10 +33,54 @@ document.getElementById("cep").addEventListener("blur", async function () {
 
     // Adiciona um feedback visual, alterando a cor da borda dos campos
     document.querySelectorAll(".form-group input").forEach((input) => {
-        input.style.borderColor = "#6a11cb"; // Borda roxa ao CPF for encontrado
+      input.style.borderColor = "#6a11cb"; // Borda roxa ao CPF for encontrado
     });
   } catch (error) {
     console.error("Erro ao buscar o CEP:", error); // Exibe o erro no console
     alert("Erro ao buscar o CEP. Verifique o console para mais detalhes");
   }
 });
+
+// Adiciona um evento de envio
+document
+  .getElementById("addressForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault(); // Impede o recarregamento da página ao enviar o formulario
+
+    // Obtém os valores dos campos do formulário e armazena
+    const cep = document.getElementById("cep").value;
+    const logradouro = document.getElementById("logradouro").value;
+    const bairro = document.getElementById("bairro").value;
+    const cidade = document.getElementById("cidade").value;
+    const estado = document.getElementById("estado").value;
+
+    try {
+      // Faz a requisição POST para o backend para salvar o endereço
+      const response = await fetch("http://localhost:3000/api/address", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Define o envio do conteudo como JSON
+        },
+        body: JSON.stringify({ cep, logradouro, bairro, cidade, estado }), // Envia os campos
+      });
+
+      if (!response.ok) {
+        // Verifica se a resposta foi bem-sucedida
+        throw new Error("Erro ao salvar o endereço!"); // Retorna um erro se falhar
+      }
+
+      // Converte a resposta req. para JSON
+      const result = await response.json();
+      alert(result.message); // Exibe a mensagem de sucesso retornada pelo Backend
+
+      // Limpa os campos do formuçário após o envio bem-sucedido
+      document.getElementByAll(".form-group input").forEach((input) => {
+        input.style.borderColor = "#ddd"; // Define a borda de volta para o padrão
+      });
+    } catch (error) {
+      console.error("Erro ao salvar o endereço", error);
+      alert(
+        "Erro ao salvar o endereço. Verifique o console para mais detalhes!."
+      );
+    }
+  });
